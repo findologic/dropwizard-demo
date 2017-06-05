@@ -2,3 +2,5 @@ logging:
   level: INFO
   loggers:
     com.findologic: DEBUG
+graphiteHost: graphite
+graphitePort: 2003
