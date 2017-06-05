@@ -1,0 +1,22 @@
+version: '3'
+services:
+  dropwizard-demo:
+    build: .
+    links:
+      - graphite
+    ports:
+      - 8080:8080 # API
+      - '127.0.0.1:8081:8081' # Metrics (local only to prevent eavesdropping)
+  # Database and TCP API for tracking time series data:
+  graphite:
+    image: rvernica/graphite
+    volumes:
+      # Persistence for metrics data (Whisper database files):
+      - '/opt/dropwizard-demo/metrics:/opt/graphite/storage/whisper'
+  # Web interface for turning Graphite metrics into charts:
+  grafana:
+    image: grafana/grafana
+    links:
+      - graphite
+    ports:
+      - '127.0.0.1:3000:3000' # Grafana web interface (local only to prevent eavesdropping)
