@@ -1,0 +1,343 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Production-ready Microservices on the JVM with Dropwizard</title>
+        <link href="https://fonts.googleapis.com/css?family=Fira+Sans:400,300" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+        <link rel="stylesheet" href="../node_modules/reveal.js/css/reveal.css">
+        <link rel="stylesheet" href="../node_modules/reveal.js/lib/css/zenburn.css">
+        <link rel="stylesheet" href="theme/findologic.css">
+        <link rel="stylesheet" href="index.css">
+    </head>
+    <body>
+        <div class="reveal">
+            <div class="slides">
+                <section>
+                    <h1>
+                        Production-ready Microservices<br>on the JVM<br>with
+                        <a href="http://www.dropwizard.io/1.1.0/docs/">Dropwizard</a>
+                    </h1>
+                </section>
+
+                <section>
+                    <section data-background="img/gandalf.jpg">
+                        <h1>What is Dropwizard?</h1>
+                    </section>
+
+                    <section>
+                        <h3>Before you run away...</h3>
+                        <ul>
+                            <li>This is not limited to Java!</li>
+                            <li>The JVM powers much cooler languages like Clojure, Kotlin, Scala and JavaScript.</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h3>Dropwizard is...</h3>
+                        <ul>
+                            <li>A framework for building small REST APIs.</li>
+                            <li>Battle-tested libraries glued together.</li>
+                            <li>Designed to be monitored.</li>
+                        </ul>
+
+                        <img src="img/dropwizard-hat.png">
+                    </section>
+
+                    <section>
+                        <h3>Dropwizard offers you...</h3>
+                        <ul>
+                            <li>Simple communication with other APIs.</li>
+                            <li>Database access.</li>
+                            <li>Data validation.</li>
+                            <li>Authentication.</li>
+                            <li>Metrics and health checks.</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h3>How it works</h3>
+
+                        <img src="img/dropwizard.png">
+                    </section>
+                </section>
+
+                <section>
+                    <section data-background="img/data_center.jpg">
+                        <h1>What is "production-ready"?</h1>
+                    </section>
+
+                    <section>
+                        <h3>Criteria</h3>
+
+                        <ul>
+                            <li>Quick implementation.</li>
+                            <li>Easy testing.</li>
+                            <li>Simple deployment.</li>
+                            <li>Low ops overhead.</li>
+                            <li>Simple to monitor.</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h3>Quick implementation</h3>
+
+                        <ol>
+                            <li>Generate a skeleton project.</li>
+                            <li>Implement a resource.</li>
+                            <li>Implement a health check.</li>
+                            <li>Deploy!</li>
+                        </ol>
+                    </section>
+
+                    <section>
+                        <h3>Easy testing</h3>
+
+                        <pre><code data-trim data-noescape>
+public class WizardResourceTest {
+    @ClassRule
+    public static final ResourceTestRule resources = ResourceTestRule.builder()
+            .addResource(new WizardResource())
+            .build();
+
+    @Test
+    public void testWizardHasAName() {
+        <mark>final Wizard wizard = resources.client()
+                            .target("/wizards")
+                            .request()
+                            .get(Wizard.class);</mark>
+
+        Assert.assertEquals("Saruman", wizard.getName());
+    }
+}
+                        </code></pre>
+                    </section>
+
+                    <section>
+                        <h3>Simple deployment</h3>
+
+                        <pre><code data-trim>
+java -jar path/to/package.war server
+                        </code></pre>
+                    </section>
+
+                    <section>
+                        <h3>Low ops overhead</h3>
+
+                        <ul>
+                            <li>Requires only a JVM.</li>
+                            <li>Runs on almost any type of server OS.</li>
+                        </ul>
+
+                        <pre><code data-trim>
+# Debian-based:
+apt install openjdk-8-jre-headless
+# Redhat-based:
+dnf install java-1.8.0-openjdk
+                        </code></pre>
+                    </section>
+
+                    <section>
+                        <h3>Simple to monitor</h3>
+
+                        <ul>
+                            <li>Complexity of monitoring is moved from monitoring system to the application.</li>
+                            <li>Health checks as one-stop solution for monitoring status.</li>
+                        </ul>
+
+                        <pre><code data-trim>
+curl http://localhost:8081/healthcheck
+                        </code></pre>
+                    </section>
+
+                    <section>
+                        <h3>Simple to monitor - resource performance</h3>
+
+                        <pre><code data-trim data-noescape>
+@Path("/wizards")
+@Produces(MediaType.APPLICATION_JSON)
+public class WizardResource {
+    @GET
+    <mark>@Timed</mark>
+    public Wizard getFortune() {
+        return new Wizard();
+    }
+}
+                        </code></pre>
+                    </section>
+
+                    <section>
+                        <h3>Simple to monitor - application metrics</h3>
+
+                        <pre><code data-trim>
+final Graphite graphiteClient = new Graphite("localhost", "2003");
+
+final GraphiteReporter reporter = GraphiteReporter
+        .forRegistry(environment.metrics())
+        .prefixedWith("dropwizard-demo")
+        .convertRatesTo(TimeUnit.SECONDS)
+        .convertDurationsTo(TimeUnit.MILLISECONDS)
+        .filter(MetricFilter.ALL)
+        .build(graphiteClient);
+
+reporter.start(10, TimeUnit.SECONDS);
+                        </code></pre>
+                    </section>
+
+                    <section>
+                        <h3>Simple to monitor - processed metrics</h3>
+                        <img src="img/grafana_dashboard.png">
+                    </section>
+                </section>
+
+                <section>
+                    <section data-background="img/mission_control.jpg">
+                        <h1>Monitoring architecture</h1>
+                    </section>
+
+                    <section>
+                        <h3>Typical Graphite setup</h3>
+
+                        <img src="img/monitoring.png">
+                    </section>
+
+                    <section>
+                        <h3>Containerized example</h3>
+
+                        <img src="img/monitoring_containers.png">
+                    </section>
+                </section>
+
+                <section class="demo-section">
+                    <section data-background="img/explosion.jpg">
+                        <h1>Demo time!</h1>
+                    </section>
+
+                    <section>
+                        <h3>Structure</h3>
+                        <img src="img/structure.png">
+
+                        <p>
+                            <a href="http://github.com/howard/dropwizard-demo">
+                                howard/dropwizard-demo
+                            </a>
+                        </p>
+                    </section>
+                </section>
+
+                <section>
+                    <section data-background="img/in_practice.jpg">
+                        <h1>In practice</h1>
+                    </section>
+
+                    <section>
+                        <h3>
+                            Upsides
+                        </h3>
+
+                        <ul>
+                            <li>Lean and minimalistic.</li>
+                            <li>High productivity for getting started.</li>
+                            <li>Sane default project structure.</li>
+                            <li>Good performance.</li>
+                            <li>Quick to learn.</li>
+                            <li>Very stable.</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h3>
+                            Downsides
+                        </h3>
+
+                        <ul>
+                            <li>
+                                Messy structure for larger APIs.
+                                <ul>
+                                    <li>Can be counter-acted by introducing dependency injection.</li>
+                                </ul>
+                            </li>
+                            <li>
+                                It's easy to lose sight of metrics.
+                                <ul>
+                                    <li>Set up alerts.</li>
+                                    <li>Integrate metrics into deployment process.</li>
+                                </ul>
+                            </li>
+                            <li>
+                                It's Java.
+                                <ul>
+                                    <li>...but there are tons of cooler languages for the JVM.</li>
+                                    <li>...and its bad reputation is no longer fully true.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </section>
+                </section>
+
+                <section>
+                    <h1>Conclusion</h1>
+                    <ul>
+                        <li>Awesome out-of-the-box experience.</li>
+                        <li>Monitoring turns from chore to bliss.</li>
+                        <li>Built on solid foundations.</li>
+                        <li>Only useful for compact APIs - large monoliths become a mess.</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h1>Resources</h1>
+                    <ul>
+                        <li>http://www.dropwizard.io/1.1.0/docs/getting-started.html</li>
+                        <li>http://www.dropwizard.io/1.1.0/docs/manual/index.html</li>
+                        <li>https://www.artofmonitoring.com/</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <section class="last-slide" data-background="img/key_visual.png">
+                        <h1 class="fragment">Happy hacking!</h1>
+                    </section>
+
+                    <section data-background="img/key_visual.png">
+                        <h1>Up next:</h1>
+
+                        <ol>
+                            <li>15min break</li>
+                            <li>How to make your team more productive - learnings from 44 sprints</li>
+                        </ol>
+                    </section>
+                </section>
+            </div>
+        </div>
+
+        <img class="findologo" src="img/findologic.svg">
+
+        <script src="../node_modules/reveal.js/lib/js/head.min.js"></script>
+        <script src="../node_modules/reveal.js/js/reveal.js"></script>
+        <script>
+            Reveal.initialize({
+                history: true,
+                transition: 'convex',
+                backgroundTransition: 'fade',
+                dependencies: [
+                    {
+                        src: '../node_modules/reveal.js/plugin/highlight/highlight.js',
+                        async: true,
+                        callback: function () {
+                            hljs.initHighlightingOnLoad();
+                        }
+                    },
+                    {
+                        src: '../node_modules/reveal.js/plugin/zoom-js/zoom.js',
+                        async: true
+                    },
+                    {
+                        src: '../node_modules/reveal.js/plugin/notes/notes.js',
+                        async: true
+                    }
+                ]
+            });
+        </script>
+    </body>
+</html>
