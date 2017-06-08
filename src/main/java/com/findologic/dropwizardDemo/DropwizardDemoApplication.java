@@ -3,10 +3,16 @@ package com.findologic.dropwizardDemo;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.graphite.Graphite;
 import com.codahale.metrics.graphite.GraphiteReporter;
+import com.findologic.dropwizardDemo.client.FortuneClient;
+import com.findologic.dropwizardDemo.health.FortuneHealthCheck;
+import com.findologic.dropwizardDemo.resources.FortuneResource;
 import io.dropwizard.Application;
+import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import org.glassfish.jersey.client.JerseyClient;
 
+import javax.ws.rs.client.Client;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
@@ -30,6 +36,32 @@ public class DropwizardDemoApplication extends Application<DropwizardDemoConfigu
     public void run(final DropwizardDemoConfiguration configuration,
                     final Environment environment) {
         enableGraphiteReports(configuration, environment);
+
+        final Client restClient = registerRestClient(configuration, environment);
+        registerFortuneResource(configuration, environment, restClient);
+    }
+
+    private void registerFortuneResource(final DropwizardDemoConfiguration configuration, final Environment environment,
+                                         final Client restClient) {
+        // The resource requires the client for the external Fortune service.
+        final FortuneClient fortuneClient = new FortuneClient(restClient, configuration.getFortuneApiUrl());
+
+        // The resource itself.
+        final FortuneResource fortuneResource = new FortuneResource(fortuneClient);
+        environment.jersey().register(fortuneResource);
+
+        // The health check for it.
+        final FortuneHealthCheck fortuneHealthCheck = new FortuneHealthCheck(fortuneResource);
+        environment.healthChecks().register("fortune", fortuneHealthCheck);
+    }
+
+    private Client registerRestClient(final DropwizardDemoConfiguration configuration, final Environment environment) {
+        final Client restClient = new JerseyClientBuilder(environment)
+                .using(configuration.getJerseyClientConfiguration())
+                .build(getName());
+        environment.jersey().register(restClient);
+
+        return restClient;
     }
 
     private void enableGraphiteReports(final DropwizardDemoConfiguration configuration, final Environment environment) {
