@@ -4,4 +4,4 @@ logging:
     com.findologic: DEBUG
 graphiteHost: graphite
 graphitePort: 2003
-fortuneApiUrl: http://www.yerkee.com/api/fortune
+fortuneApiUrl: http://eris.codexfons.net:1337/fortune

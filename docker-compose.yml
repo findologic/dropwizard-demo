@@ -15,7 +15,8 @@ services:
       - '/opt/dropwizard-demo/metrics:/opt/graphite/storage/whisper'
   # Web interface for turning Graphite metrics into charts:
   grafana:
-    image: grafana/grafana
+    # Build it manually, so we can override the default configuration with a preset dashboard.
+    build: ./grafana
     links:
       - graphite
     ports:
