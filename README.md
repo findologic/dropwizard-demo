@@ -1,5 +1,7 @@
 # dropwizardDemo
 
+[![Build Status](https://travis-ci.org/howard/dropwizard-demo.png)](https://travis-ci.org/howard/dropwizard-demo)
+
 How to start the dropwizardDemo application
 ---
 
