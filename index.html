@@ -5,8 +5,8 @@
         <title>Production-ready Microservices on the JVM with Dropwizard</title>
         <link href="https://fonts.googleapis.com/css?family=Fira+Sans:400,300" rel="stylesheet" type="text/css">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
-        <link rel="stylesheet" href="../node_modules/reveal.js/css/reveal.css">
-        <link rel="stylesheet" href="../node_modules/reveal.js/lib/css/zenburn.css">
+        <link rel="stylesheet" href="node_modules/reveal.js/css/reveal.css">
+        <link rel="stylesheet" href="node_modules/reveal.js/lib/css/zenburn.css">
         <link rel="stylesheet" href="theme/findologic.css">
         <link rel="stylesheet" href="index.css">
     </head>
@@ -332,8 +332,8 @@ reporter.start(10, TimeUnit.SECONDS);
 
         <img class="findologo" src="img/findologic.svg">
 
-        <script src="../node_modules/reveal.js/lib/js/head.min.js"></script>
-        <script src="../node_modules/reveal.js/js/reveal.js"></script>
+        <script src="node_modules/reveal.js/lib/js/head.min.js"></script>
+        <script src="node_modules/reveal.js/js/reveal.js"></script>
         <script>
             Reveal.initialize({
                 history: true,
@@ -341,18 +341,18 @@ reporter.start(10, TimeUnit.SECONDS);
                 backgroundTransition: 'fade',
                 dependencies: [
                     {
-                        src: '../node_modules/reveal.js/plugin/highlight/highlight.js',
+                        src: './node_modules/reveal.js/plugin/highlight/highlight.js',
                         async: true,
                         callback: function () {
                             hljs.initHighlightingOnLoad();
                         }
                     },
                     {
-                        src: '../node_modules/reveal.js/plugin/zoom-js/zoom.js',
+                        src: './node_modules/reveal.js/plugin/zoom-js/zoom.js',
                         async: true
                     },
                     {
-                        src: '../node_modules/reveal.js/plugin/notes/notes.js',
+                        src: './node_modules/reveal.js/plugin/notes/notes.js',
                         async: true
                     }
                 ]
