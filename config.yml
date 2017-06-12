@@ -4,4 +4,4 @@ logging:
     com.findologic: DEBUG
 graphiteHost: graphite
 graphitePort: 2003
-fortuneApiUrl: http://eris.codexfons.net:1337/fortune
+fortuneApiUrl: http://fortune.codexfons.com:1337/fortune
